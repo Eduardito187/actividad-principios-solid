@@ -1,0 +1,14 @@
+# Ignorar bytecode de Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Ignorar entornos virtuales
+.venv/
+venv/
+ENV/
+
+# Archivos de config locales
+*.log
+*.sqlite3

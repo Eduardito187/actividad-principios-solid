@@ -14,5 +14,6 @@ class DoctorAgendaQuery:
 
     def __call__(self, doctor_id: str, day: str) -> tuple[Result, List[Appointment]]:
         appts = self.appointments.for_doctor_and_day(UUID(doctor_id), day)
-        self.logger.info("doctor.agenda.query", {'id': str(appts[0].id)})
+        for appt in appts:
+            self.logger.info("doctor.agenda.query", appt)
         return Result(True, f"{len(appts)} appointments"), appts

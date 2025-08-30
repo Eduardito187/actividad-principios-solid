@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
+from src.app.dto.doctor_note import DoctorNote
 from .value_objects import AppointmentId, PatientId, DoctorId, TimeSlot
 
 class AppointmentStatus(Enum):
@@ -8,10 +9,6 @@ class AppointmentStatus(Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     CANCELLED = "CANCELLED"
-
-@dataclass
-class DoctorNote:
-    summary: str
 
 @dataclass
 class Appointment:

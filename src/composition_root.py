@@ -1,6 +1,6 @@
 from __future__ import annotations
 from datetime import datetime, timedelta
-from uuid import uuid4
+from src.app.use_cases.record_doctor_note import RecordDoctorNote
 from src.domain.entities.value_objects import EmailAddress, PhoneNumber
 from src.domain.policies.scheduling_policy import SimpleNoOverlapPolicy
 from src.infrastructure.logging.std_logger import StdLogger
@@ -30,7 +30,7 @@ def demo():
     clock = SystemClock()
     policy = SimpleNoOverlapPolicy()
 
-    # Seed: doctor y paciente
+    # Crear: doctor y paciente
     d = Doctor(
         id=doctors.next_id(),
         name="Dra. Pérez",
@@ -47,7 +47,7 @@ def demo():
     )
     patients.save(p)
 
-    # 1) Reservar
+    #Reservar
     start = datetime.now() + timedelta(hours=2)
     end   = start + timedelta(minutes=30)
     book = BookAppointment(appointments, patients, doctors, policy, notifier, logger, clock)
@@ -58,17 +58,26 @@ def demo():
         end=end
     ))
 
-    # 2) Aprobar
-    approve = ApproveAppointment(appointments, patients, notifier, logger)
-    approve(str(appt_id))
+    if appt_id != None:
+        #Aprobar
+        approve = ApproveAppointment(appointments, patients, notifier, logger)
+        approve(str(appt_id))
 
-    # 3) Agendar
-    agenda = DoctorAgendaQuery(appointments, logger)
-    agenda(str(d.id), day=start.strftime("%Y-%m-%d"))
+        #Cancelar
+        cancel = CancelAppointment(appointments, patients, notifier, logger)
+        cancel(str(appt_id))
 
-    # 4) Cancelar
-    cancel = CancelAppointment(appointments, patients, notifier, logger)
-    cancel(str(appt_id))
+        #Agenda
+        agenda = DoctorAgendaQuery(appointments, logger)
+        agenda(str(d.id), day=start.strftime("%Y-%m-%d"))
+
+        #Resumen
+        resumen = RecordDoctorNote(appointments, logger)
+        resumen(str(appt_id), "All good", "A paracetamol and off to work")
+
+        #Imprimir agenda nuevamente
+        agenda(str(d.id), day=start.strftime("%Y-%m-%d"))
+
 
 if __name__ == "__main__":
     demo()

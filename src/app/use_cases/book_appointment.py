@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from src.infrastructure.logging.std_logger import LoggedValueError
 from src.app.dto.book_appointment_dto import BookAppointmentDTO
 from src.app.result import Result
 from src.domain.contracts.repositories import AppointmentRepository, PatientRepository, DoctorRepository
@@ -26,13 +27,16 @@ class BookAppointment:
         patient = self.patients.find_by_id(UUID(dto.patient_id))
         doctor = self.doctors.find_by_id(UUID(dto.doctor_id))
         if not patient or not doctor:
-            return Result(False, "patient or doctor not found"), None
+            LoggedValueError("paciente o doctor no encontrado")
+            return Result(False, "error"), None
 
         slot = TimeSlot(dto.start, dto.end)
         existing = self.appointments.overlapping_for_doctor(doctor.id, slot)
         problems = self.policy.validate(slot, existing)
         if problems:
-            return Result(False, "; ".join(problems)), None
+            for problem in problems:
+                LoggedValueError(problem)
+            return Result(False, "error"), None
 
         appt_id = self.appointments.next_id()
         appt = Appointment(appt_id, patient.id, doctor.id, slot)
